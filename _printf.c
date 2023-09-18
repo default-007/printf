@@ -51,39 +51,30 @@ int print_string(va_list list)
  */
 int _printf(const char *format, ...)
 {
-	va_list ap;
-	unsigned int j = 0, n = 0;
+	int printed_chars;
+	conver_t f_list[] = {
+		{"c", print_char},
+		{"s", print_string},
+		{"%", print_percent},
+		{"d", print_integer},
+		{"i", print_integer},
+		{"b", print_binary},
+		{"r", print_reversed},
+		{"R", rot13},
+		{"u", unsigned_integer},
+		{"o", print_octal},
+		{"x", print_hex},
+		{"X", print_heX},
+		{NULL, NULL}
+	};
+	va_list arg_list;
 
-	va_start(ap, format);
-	while (format[j] != '\0')
-	{
-		if (format[j] == '%')
-		{
-			switch (format[j + 1])
-			{
-				case 'c':
-					_putchar(va_arg(ap, int));
-					n++;
-					break;
-				case 's':
-					n += print_string(va_arg(ap, char *));
+	if (format == NULL)
+		return (-1);
 
-					break;
-				case '%':
-					_putchar('%');
-					n++;
-					break;
-			}
-
-			j++;
-		}
-		else
-		{
-			_putchar(format[j]);
-			n++;
-		}
-		j++;
-	}
-	va_end(ap);
-	return (n);
+	va_start(arg_list, format);
+	/*Calling parser function*/
+	printed_chars = parser(format, f_list, arg_list);
+	va_end(arg_list);
+	return (printed_chars);
 }
