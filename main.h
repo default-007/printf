@@ -1,22 +1,24 @@
 #ifndef MAIN_H
 #define MAIN_H
-/**
-* struct convert - defines a structure for symbols and functions
-*
-* @sym: The operator
-* @f: The function associated
-*/
-struct convert
+
+#include <stdlib.h>
+#include <stdarg.h>
+
+typedef struct printHandler
 {
-	char *sym;
-	int (*f)(va_list);
-};
-typedef struct convert conver_t;
+	char c;
+	int (*f)(va_list ap, flags_t *f);
+} ph;
 
-int parser(const char *format, conver_t f_list[], va_list arg_list);
+/* _printf */
 int _printf(const char *format, ...);
-int _write_char(char);
-int print_char(va_list);
-int print_string(va_list);
 
-#endif /* MAIN_H */
+/* print_alpha */
+int print_string(va_list l, flags_t *f);
+int print_char(va_list l, flags_t *f);
+
+/* write_funcs */
+int _putchar(char c);
+int _puts(char *str);
+
+#endif

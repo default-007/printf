@@ -1,80 +1,50 @@
-#include <unistd.h>
-#include <stdarg.h>
 #include "main.h"
-/**
- * _putchar - writes the character c to stdout
- * @c: The character to print
- *
- * Return: On success 1.
- * On error, -1 is returned, and errno is set appropriately.
-*/
-
-int _putchar(char c)
-{
-	return (write(1, &c, 1));
-}
+#include <limits.h>
+#include <stdio.h>
 
 /**
- * print_char - Prints character
- * @list: list of arguments
- * Return: Will return the amount of characters printed.
- */
-int print_char(va_list list)
-{
-	_write_char(va_arg(list, int));
-	return (1);
-}
-
-/**
- * print_string - Prints a string
- * @list: list of arguments
- * Return: Will return the amount of characters printed.
- */
-
-int print_string(va_list list)
-{
-	int i;
-	char *str;
-
-	str = va_arg(list, char *);
-	if (str == NULL)
-		str = "(null)";
-	for (i = 0; str[i] != '\0'; i++)
-		_write_char(str[i]);
-	return (i);
-}
-
-/**
- * _printf - Produces output according to a format
- * @format: The format of the string.
- * Return: The number of characters printed
+ * _printf - produces output according to a format
+ * @format: format string containing the characters and the specifiers
+ * Description: this function will call the get_print() function that will
+ * determine which printing function to call depending on the conversion
+ * specifiers contained into fmt
+ * Return: length of the formatted output string
  */
 int _printf(const char *format, ...)
 {
-	int printed_chars;
-	conver_t f_list[] = {
-		{"c", print_char},
-		{"s", print_string},
-		{"%", print_percent},
-		{"d", print_integer},
-		{"i", print_integer},
-		{"b", print_binary},
-		{"r", print_reversed},
-		{"R", rot13},
-		{"u", unsigned_integer},
-		{"o", print_octal},
-		{"x", print_hex},
-		{"X", print_heX},
-		{NULL, NULL}
-	};
-	va_list arg_list;
+	int (*pfunc)(va_list, flags_t *);
+	const char *p;
+	va_list arguments;
+	flags_t flags = {0, 0, 0};
 
-	if (format == NULL)
+	register int count = 0;
+
+	va_start(arguments, format);
+	if (!format || (format[0] == '%' && !format[1]))
 		return (-1);
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
+		return (-1);
+	for (p = format; *p; p++)
+	{
+		if (*p == '%')
+		{
+			p++;
+			if (*p == '%')
+			{
+				count += _putchar('%');
+				continue;
+			}
+			while (get_flag(*p, &flags))
+				p++;
+			pfunc = get_print(*p);
+			count += (pfunc)
+				? pfunc(arguments, &flags)
+				: _printf("%%%c", *p);
+		} else
+			count += _putchar(*p);
+	}
+	_putchar(-1);
+	va_end(arguments);
+	return (count);
 
-	va_start(arg_list, format);
-	/*Calling parser function*/
-	printed_chars = parser(format, f_list, arg_list);
-	va_end(arg_list);
-	return (printed_chars);
 }
